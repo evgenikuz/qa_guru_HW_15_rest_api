@@ -8,6 +8,7 @@ repositories {
 
 dependencies {
     testImplementation (
+            'io.rest-assured:rest-assured:5.5.2',
             'org.junit.jupiter:junit-jupiter:5.10.0',
             'org.slf4j:slf4j-simple:2.0.7'
     )
@@ -21,11 +22,5 @@ tasks.withType(Test) {
             events "started", "skipped", "failed", "standard_error", "standard_out"
             exceptionFormat "short"
         }
-    }
-}
-
-task promo_test(type: Test) {
-    useJUnitPlatform {
-        includeTags("Promo")
     }
 }
