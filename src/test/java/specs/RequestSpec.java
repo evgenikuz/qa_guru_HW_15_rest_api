@@ -7,7 +7,7 @@ import static io.restassured.RestAssured.with;
 import static io.restassured.http.ContentType.JSON;
 import static tests.TestBase.APIKEY;
 
-public class CreateSpec {
+public class RequestSpec {
     public static RequestSpecification requestSpec = with()
             .filter(withCustomTemplates())
             .contentType(JSON)

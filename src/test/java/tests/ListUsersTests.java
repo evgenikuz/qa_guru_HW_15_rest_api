@@ -1,32 +1,39 @@
 package tests;
 
+import models.ListUsersResponseModel;
 import org.junit.jupiter.api.Test;
 
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.*;
+import static specs.RequestSpec.requestSpec;
+import static specs.ResponseSpec.responseSpec;
 
 public class ListUsersTests extends TestBase{
     @Test
     void successfulGetListOfUsersTest() {
-        given()
-                .header("x-api-key", APIKEY)
-                .log().uri()
+        ListUsersResponseModel response = step("Make request", () ->
+        given(requestSpec)
 
             .when()
                 .queryParam("page", "2")
                 .get("/users")
 
             .then()
-                .log().status()
-                .log().body()
-                .statusCode(200)
-                .body("page", is(2))
-                .body("total", is(12))
-                .body("data", is(notNullValue()))
-                .body("data.id[0]", is(instanceOf(Integer.class)))
-                .body("data.email[0]", containsString("@"))
-                .body("data.first_name[0]", is(instanceOf(String.class)))
-                .body("data.last_name[0]", is(instanceOf(String.class)))
-                .body("data.avatar[0]", matchesPattern("^https://.*\\.jpg$"));
+                .spec(responseSpec(200))
+                .extract().as(ListUsersResponseModel.class));
+
+        step("Check response", () -> {
+            assertEquals(2, response.getPage());
+            assertEquals(12, response.getTotal());
+            assertNotNull(response.getData());
+            assertInstanceOf(Integer.class, response.getData().get(0).getId());
+            assert response.getData().get(0).getEmail().contains("@");
+            assertInstanceOf(String.class, response.getData().get(0).getFirst_name());
+            assertInstanceOf(String.class, response.getData().get(0).getLast_name());
+            assert response.getData().get(0).getAvatar().matches("^https://.*\\.jpg$");
+        });
     }
 }
