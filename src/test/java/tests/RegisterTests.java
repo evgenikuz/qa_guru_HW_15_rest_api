@@ -1,96 +1,102 @@
 package tests;
 
+import models.RegisterBodyModel;
+import models.RegisterErrorResponseModel;
+import models.RegisterResponseModel;
 import org.junit.jupiter.api.Test;
 
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.*;
+import static specs.RequestSpec.requestSpec;
+import static specs.ResponseSpec.responseSpec;
 
 public class RegisterTests extends TestBase {
     @Test
     void successfulRegisterTest() {
-        String regData = "{\n" +
-                "    \"email\": \"eve.holt@reqres.in\",\n" +
-                "    \"password\": \"pistol\"\n" +
-                "}";
-        given()
-                .header("x-api-key", APIKEY)
+        RegisterBodyModel regData = new RegisterBodyModel();
+        regData.setEmail("eve.holt@reqres.in");
+        regData.setPassword("pistol");
+
+        RegisterResponseModel response = step("Make request", () ->
+        given(requestSpec)
                 .body(regData)
-                .contentType(JSON)
-                .log().uri()
 
             .when()
                 .post("/register")
 
             .then()
-                .log().status()
-                .log().body()
-                .statusCode(200)
-                .body("id", is(notNullValue()))
-                .body("id", is(instanceOf(Integer.class)))
-                .body("token", is(notNullValue()))
-                .body("token", matchesPattern("^.{17}$"));
+                .spec(responseSpec(200))
+                .extract().as(RegisterResponseModel.class));
+
+        step("Check response", () -> {
+            assertNotNull(response.getId());
+            assertInstanceOf(Integer.class, response.getId());
+            assertNotNull(response.getToken());
+            assert response.getToken().matches("^.{17}$");
+        });
     }
 
     @Test
     void registerWithoutEmailTest() {
-        String regData = "{\n" +
-                "    \"password\": \"pistol\"\n" +
-                "}";
-        given()
-                .header("x-api-key", APIKEY)
-                .body(regData)
-                .contentType(JSON)
-                .log().uri()
+        RegisterBodyModel regData = new RegisterBodyModel();
+        regData.setPassword("pistol");
+
+        RegisterErrorResponseModel response = step("Make request", () ->
+                given(requestSpec)
+                    .body(regData)
 
                 .when()
-                .post("/register")
+                    .post("/register")
 
                 .then()
-                .log().status()
-                .log().body()
-                .statusCode(400)
-                .body("error", is("Missing email or username"));
+                    .spec(responseSpec(400))
+                    .extract().as(RegisterErrorResponseModel.class));
+
+        step("Check response", () ->
+            assertEquals("Missing email or username", response.getError())
+        );
+
     }
 
     @Test
     void registerWithoutPasswordTest() {
-        String regData = "{\n" +
-                "    \"email\": \"eve.holt@reqres.in\"\n" +
-                "}";
-        given()
-                .header("x-api-key", APIKEY)
-                .body(regData)
-                .contentType(JSON)
-                .log().uri()
+        RegisterBodyModel regData = new RegisterBodyModel();
+        regData.setEmail("eve.holt@reqres.in");
+
+        RegisterErrorResponseModel response = step("Make request", () ->
+                given(requestSpec)
+                    .body(regData)
 
                 .when()
-                .post("/register")
+                    .post("/register")
 
                 .then()
-                .log().status()
-                .log().body()
-                .statusCode(400)
-                .body("error", is("Missing password"));
+                    .spec(responseSpec(400))
+                    .extract().as(RegisterErrorResponseModel.class));
+
+        step("Check response", () ->
+                assertEquals("Missing password", response.getError())
+        );
     }
 
     @Test
     void registerWithNoDataTest() {
-        String regData = "{}";
-        given()
-                .header("x-api-key", APIKEY)
-                .body(regData)
-                .contentType(JSON)
-                .log().uri()
+        RegisterBodyModel regData = new RegisterBodyModel();
 
-            .when()
-                .post("/register")
+        RegisterErrorResponseModel response = step("Make request", () ->
+                given(requestSpec)
+                    .body(regData)
 
-            .then()
-                .log().status()
-                .log().body()
-                .statusCode(400)
-                .body("error", is("Missing email or username"));
+                .when()
+                    .post("/register")
+
+                .then()
+                    .spec(responseSpec(400))
+                    .extract().as(RegisterErrorResponseModel.class));
+
+        step("Check response", () ->
+                assertEquals("Missing email or username", response.getError())
+        );
     }
 }
