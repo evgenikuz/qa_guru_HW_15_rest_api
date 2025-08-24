@@ -10,13 +10,13 @@ repositories {
 
 allure {
     report {
-        version.set("2.29.0")  // Версия Allure  (берем с https://github.com/allure-framework/allure2)
+        version.set("2.29.0")
     }
-    adapter {  // отвечает за появление build/allure-results
-        aspectjWeaver.set(true)  //обработка аннотации @Step
+    adapter {
+        aspectjWeaver.set(true)
         frameworks {
-            junit5 {  // название фреймворка, типа TestNG, Junit4
-                adapterVersion.set("2.29.1")  // Версия адаптера для Allure для JUnit 5
+            junit5 {
+                adapterVersion.set("2.29.1")
             }
         }
     }
