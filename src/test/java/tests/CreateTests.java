@@ -8,26 +8,22 @@ import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static specs.RequestSpec.requestSpec;
-import static specs.ResponseSpec.responseSpec;
+import static specs.BaseSpec.requestSpec;
+import static specs.BaseSpec.responseSpec;
 
 public class CreateTests extends TestBase {
     @Test
     void successfulCreateUserTest() {
-        CreateBodyModel userData = new CreateBodyModel();
-        userData.setName("morpheus");
-        userData.setJob("leader");
+        CreateBodyModel userData = new CreateBodyModel("morpheus", "leader");
 
         CreateResponseModel response = step("Make request", () ->
-            given(requestSpec)
-                .body(userData)
-
-            .when()
-                .post("/users")
-
-            .then()
-                    .spec(responseSpec(201))
-                .extract().as(CreateResponseModel.class));
+                given(requestSpec)
+                        .body(userData)
+                        .when()
+                        .post("/users")
+                        .then()
+                        .spec(responseSpec(201))
+                        .extract().as(CreateResponseModel.class));
 
         step("Check response", () -> {
             assertEquals("morpheus", response.getName());
@@ -40,14 +36,12 @@ public class CreateTests extends TestBase {
 
     @Test
     void possibleToCreateUserWithoutInfoTest() {
-        CreateBodyModel userData = new CreateBodyModel();
+        CreateBodyModel userData = new CreateBodyModel(null, null);
         CreateResponseModel response = step("Make request", () ->
                 given(requestSpec)
                         .body(userData)
-
                         .when()
                         .post("/users")
-
                         .then()
                         .spec(responseSpec(201))
                         .extract().as(CreateResponseModel.class));

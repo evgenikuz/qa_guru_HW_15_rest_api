@@ -8,26 +8,22 @@ import org.junit.jupiter.api.Test;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
-import static specs.RequestSpec.requestSpec;
-import static specs.ResponseSpec.responseSpec;
+import static specs.BaseSpec.requestSpec;
+import static specs.BaseSpec.responseSpec;
 
 public class RegisterTests extends TestBase {
     @Test
     void successfulRegisterTest() {
-        RegisterBodyModel regData = new RegisterBodyModel();
-        regData.setEmail("eve.holt@reqres.in");
-        regData.setPassword("pistol");
+        RegisterBodyModel regData = new RegisterBodyModel("eve.holt@reqres.in", "pistol");
 
         RegisterResponseModel response = step("Make request", () ->
-        given(requestSpec)
-                .body(regData)
-
-            .when()
-                .post("/register")
-
-            .then()
-                .spec(responseSpec(200))
-                .extract().as(RegisterResponseModel.class));
+                given(requestSpec)
+                        .body(regData)
+                        .when()
+                        .post("/register")
+                        .then()
+                        .spec(responseSpec(200))
+                        .extract().as(RegisterResponseModel.class));
 
         step("Check response", () -> {
             assertNotNull(response.getId());
@@ -39,41 +35,34 @@ public class RegisterTests extends TestBase {
 
     @Test
     void registerWithoutEmailTest() {
-        RegisterBodyModel regData = new RegisterBodyModel();
-        regData.setPassword("pistol");
+        RegisterBodyModel regData = new RegisterBodyModel(null, "pistol");
 
         RegisterErrorResponseModel response = step("Make request", () ->
                 given(requestSpec)
-                    .body(regData)
-
-                .when()
-                    .post("/register")
-
-                .then()
-                    .spec(responseSpec(400))
-                    .extract().as(RegisterErrorResponseModel.class));
+                        .body(regData)
+                        .when()
+                        .post("/register")
+                        .then()
+                        .spec(responseSpec(400))
+                        .extract().as(RegisterErrorResponseModel.class));
 
         step("Check response", () ->
-            assertEquals("Missing email or username", response.getError())
+                assertEquals("Missing email or username", response.getError())
         );
-
     }
 
     @Test
     void registerWithoutPasswordTest() {
-        RegisterBodyModel regData = new RegisterBodyModel();
-        regData.setEmail("eve.holt@reqres.in");
+        RegisterBodyModel regData = new RegisterBodyModel("eve.holt@reqres.in", null);
 
         RegisterErrorResponseModel response = step("Make request", () ->
                 given(requestSpec)
-                    .body(regData)
-
-                .when()
-                    .post("/register")
-
-                .then()
-                    .spec(responseSpec(400))
-                    .extract().as(RegisterErrorResponseModel.class));
+                        .body(regData)
+                        .when()
+                        .post("/register")
+                        .then()
+                        .spec(responseSpec(400))
+                        .extract().as(RegisterErrorResponseModel.class));
 
         step("Check response", () ->
                 assertEquals("Missing password", response.getError())
@@ -82,18 +71,16 @@ public class RegisterTests extends TestBase {
 
     @Test
     void registerWithNoDataTest() {
-        RegisterBodyModel regData = new RegisterBodyModel();
+        RegisterBodyModel regData = new RegisterBodyModel(null, null);
 
         RegisterErrorResponseModel response = step("Make request", () ->
                 given(requestSpec)
-                    .body(regData)
-
-                .when()
-                    .post("/register")
-
-                .then()
-                    .spec(responseSpec(400))
-                    .extract().as(RegisterErrorResponseModel.class));
+                        .body(regData)
+                        .when()
+                        .post("/register")
+                        .then()
+                        .spec(responseSpec(400))
+                        .extract().as(RegisterErrorResponseModel.class));
 
         step("Check response", () ->
                 assertEquals("Missing email or username", response.getError())
